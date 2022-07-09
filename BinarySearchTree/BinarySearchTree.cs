@@ -7,9 +7,15 @@ using System.Threading.Tasks;
 
 namespace BinarySearchTree
 {
-    public class BinarySearchTree<T> where T : IComparable<T>
+    public class BinarySearchTree<T> : IEnumerable<T> where T : IComparable<T>
     {
-        protected class Node
+        public int Count { get; private set; }
+
+        public BinarySearchTree()
+        {
+            Count = 0;
+        }
+        private class Node
         {
             public T value;
             public Node left;
@@ -20,44 +26,66 @@ namespace BinarySearchTree
 
         private Node _root;
 
-        public void Insert(T value)
+        public T GetRootValue => _root.value;
+
+        public void Add(T value)
         {
-            if (_root == null)
+            if (_root == null)//if we don't have root
             {
                 _root = new Node(value);
+                Count++;
+                return;
             }
-            else
+
+            Insert(_root);
+
+            void Insert(Node curRoot)
             {
-                Node FindParentRoot(T value, Node curRoot)
-                //if it's a new value returns node witch can be a parent
-                //if no, returns a parent
-                {
-                    if (curRoot.value.GreaterThan(value))
-                    {
-                        return curRoot.left == null || curRoot.left.value.CompareTo(value) == 0
-                            ? curRoot : FindParentRoot(value, curRoot.left);
-                    }
+                bool insertToLeft = curRoot.value.GreaterThan(value) && curRoot.left == null;
+                bool insertToRight = !curRoot.value.GreaterThan(value) && curRoot.right == null;
 
-                    return curRoot.right == null || curRoot.right.value.CompareTo(value) == 0
-                        ? curRoot : FindParentRoot(value, curRoot.right);
+                if (curRoot.value.Equals(value))
+                {
+                    return;
                 }
-
-                Node insertLeaf = FindParentRoot(value, _root);
-                if (!insertLeaf.value.Equals(value))
+                if(insertToLeft || insertToRight)
                 {
-                    if (insertLeaf.value.GreaterThan(value))
+                    if (insertToLeft)
                     {
-                        insertLeaf.left = new Node(value);
+                        curRoot.left = new Node(value);
                     }
                     else
                     {
-                        insertLeaf.right = new Node(value);
+                        curRoot.right = new Node(value);
                     }
+                    Count++;
+                    return;
+                }
+                if(curRoot.value.GreaterThan(value))
+                {
+                    Insert(curRoot.left);
+                }
+                else
+                {
+                    Insert(curRoot.right);
                 }
             }
         }
         public T Pop()
         {
+            T valueDeleted;
+            if (_root.left == null)
+            {
+                valueDeleted = _root.value;
+                _root = _root.right != null ? _root.right : null;
+            }
+            else
+            {
+                valueDeleted = Pop(_root, _root.left);
+            }
+            Count--;
+            return valueDeleted;
+
             T Pop(Node parent, Node current)
             {
                 if (current.left == null)
@@ -70,104 +98,113 @@ namespace BinarySearchTree
                     return Pop(current, current.left);
                 }
             }
-
-            T valueDeleted;
-            if (_root.left == null)
-            {
-                valueDeleted = _root.value;
-                _root = _root.right != null ? _root.right : null;
-            }
-            else
-            {
-                valueDeleted = Pop(_root, _root.left);
-            }
-            return valueDeleted;
         }
-        private T PopLeaf(Node parent, Node curNode)
-        {
-            if (curNode.left != null)
-            {
-                return PopLeaf(curNode, curNode.left);
-            }
-            else if (curNode.right != null)
-            {
-                return PopLeaf(curNode, curNode.right);
-            }
-            else
-            {
-                var leafVal = curNode.value;
-                if (parent.left != null && parent.left.value.Equals(curNode.value))
-                {
-                    parent.left = null;
-                }
-                else
-                {
-                    parent.right = null;
-                }
-
-                return leafVal;
-            }
-        }
-
-        private void DeleteNode(Node parent, Node nodeToDel)
-        {
-            if (nodeToDel.right != null && nodeToDel.left != null)
-            {
-                nodeToDel.value = PopLeaf(nodeToDel, nodeToDel.right);
-            }
-            else if (nodeToDel.left == null && nodeToDel.right == null)
-            {
-                PopLeaf(parent, nodeToDel);
-            }
-            else
-            {
-                if (parent.left != null && parent.left.value.Equals(nodeToDel.value))
-                {
-                    parent.left = nodeToDel.left != null ? nodeToDel.left : nodeToDel.right;
-                }
-                else
-                {
-                    parent.right = nodeToDel.left != null ? nodeToDel.left : nodeToDel.right;
-                }
-            }
-        }
-        private void DeleteNodeWithValue(T value, Node parent, Node curNode)
-        {
-            if (value.Equals(curNode.value))
-            {
-                DeleteNode(parent, curNode);
-                return;
-            }
-            else if (value.GreaterThan(curNode.value) && curNode.right != null)
-            {
-                DeleteNodeWithValue(value, curNode, curNode.right);
-            }
-
-            else if (!value.GreaterThan(curNode.value) && curNode.left != null)
-            {
-                DeleteNodeWithValue(value, curNode, curNode.left);
-            }
-            else
-            {
-                throw new InvalidDataException();
-            }
-        }
-
         public void Delete(T value)
         {
             try
             {
                 DeleteNodeWithValue(value, null, _root);
+                Count--;
             }
             catch (InvalidDataException ex)
             {
                 Console.WriteLine("Value does not exists");
             }
+
+            void DeleteNodeWithValue(T value, Node parent, Node curNode)
+            {
+                if (value.Equals(curNode.value))
+                {
+                    DeleteNode(parent, curNode);
+                    return;
+                }
+                else if (value.GreaterThan(curNode.value) && curNode.right != null)
+                {
+                    DeleteNodeWithValue(value, curNode, curNode.right);
+                }
+
+                else if (!value.GreaterThan(curNode.value) && curNode.left != null)
+                {
+                    DeleteNodeWithValue(value, curNode, curNode.left);
+                }
+                else
+                {
+                    throw new InvalidDataException();
+                }
+            }
+
+            void DeleteNode(Node parent, Node nodeToDel)
+            {
+                if (nodeToDel.right != null && nodeToDel.left != null)
+                {
+                    nodeToDel.value = FindAndPopSmallestLeaf(nodeToDel, nodeToDel.right);
+                }
+                else if (nodeToDel.left == null && nodeToDel.right == null)
+                {
+                    FindAndPopSmallestLeaf(parent, nodeToDel);
+                }
+                else
+                {
+                    if(parent == null)//root
+                    {
+                        _root = nodeToDel.left != null ? nodeToDel.left : nodeToDel.right;
+                    }
+                    else if (parent.left != null && parent.left.value.Equals(nodeToDel.value))
+                    {
+                        parent.left = nodeToDel.left != null ? nodeToDel.left : nodeToDel.right;
+                    }
+                    else
+                    {
+                        parent.right = nodeToDel.left != null ? nodeToDel.left : nodeToDel.right;
+                    }
+                }
+            }
+
+            T FindAndPopSmallestLeaf(Node parent, Node curNode)
+            {
+                if (curNode.left != null)
+                {
+                    return FindAndPopSmallestLeaf(curNode, curNode.left);
+                }
+                else if (curNode.right != null)
+                {
+                    return FindAndPopSmallestLeaf(curNode, curNode.right);
+                }
+                else
+                {
+                    var leafVal = curNode.value;
+                    if (parent == null)//root
+                    {
+                        _root = null;
+                    }
+                    else if (parent.left != null && parent.left.value.Equals(curNode.value))
+                    {
+                        parent.left = null;
+                    }
+                    else
+                    {
+                        parent.right = null;
+                    }
+
+                    return leafVal;
+                }
+            }
         }
 
-        //public IEnumerator<T> GetEnumerator() => new BSTEnumerator(this);
-        //
-        //IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        public bool Contains(T value)
+        {
+            bool found = false;
+            Node curNode = _root;
+            while(curNode != null && !found)
+            {
+                if(curNode.value.Equals(value))
+                {
+                    found = true;
+                }
+                curNode = curNode.value.GreaterThan<T>(value) ? curNode.left : curNode.right;
+            }
+            return found;
+        }
 
         public IEnumerable<T> Iterate()
         {
@@ -175,7 +212,7 @@ namespace BinarySearchTree
             {
                 if (curNode.left != null)
                 {
-                    foreach(var item in IterateRecursively(curNode.left))
+                    foreach (var item in IterateRecursively(curNode.left))
                     {
                         yield return item;
                     }
@@ -195,9 +232,17 @@ namespace BinarySearchTree
             }
         }
 
+        public IEnumerator<T> GetEnumerator() => Iterate().GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 
-        //protected class BSTEnumerator : IEnumerator<T>
+
+        //public IEnumerator<T> GetEnumerator() => new BSTEnumerator(this);
+        //
+        //IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        //private class BSTEnumerator : IEnumerator<T>
         //{
         //    private BinarySearchTree<T> _bst;
         //    private Stack<Node> _readNodes;
