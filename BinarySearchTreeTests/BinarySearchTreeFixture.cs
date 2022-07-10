@@ -1,11 +1,14 @@
 using BinarySearchTree;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
 using System.Collections.Generic;
+using System;
 
 namespace BinarySearchTreeTests
 {
     [TestClass]
-    public class BinarySearchTreeTests
+    public class BinarySearchTreeFixture
+
     {
         [TestMethod]
         public void Count_EmptyBST()
@@ -30,13 +33,7 @@ namespace BinarySearchTreeTests
             bst.Add(10);
             bst.Add(20);
             Assert.AreEqual<int>(2, bst.Count);
-            int rightValue = 0;
-            var enumerator = bst.GetEnumerator();
-            for(int i = 0; i < 2; i++)
-            {
-                enumerator.MoveNext();
-                rightValue = enumerator.Current;
-            }
+            int rightValue = bst.ElementAt<int>(1);
             Assert.AreEqual<int>(20, rightValue);
         }
 
@@ -47,10 +44,7 @@ namespace BinarySearchTreeTests
             bst.Add(10);
             bst.Add(9);
             Assert.AreEqual<int>(2, bst.Count);
-            int leftValue = 0;
-            var enumerator = bst.GetEnumerator();
-            enumerator.MoveNext();
-            leftValue = enumerator.Current;
+            int leftValue = bst.ElementAt(0);
 
             Assert.AreEqual<int>(9, leftValue);
         }
@@ -70,38 +64,44 @@ namespace BinarySearchTreeTests
         [TestMethod]
         public void AllAdded()
         {
+            int countToAdd = 50;
             BinarySearchTree<int> bst = new BinarySearchTree<int>();
-            HashSet<int> allIteratedNumbers = new HashSet<int>();
-            bst.Add(48);
-            bst.Add(20);
-            bst.Add(18);
-            bst.Add(25);
-            bst.Add(21);
-            bst.Add(31);
-            bst.Add(23);
-            bst.Add(21);
-            bst.Add(90);
-            bst.Add(50);
-            bst.Add(110);
-            foreach(var item in bst)
-            {
-                allIteratedNumbers.Add(item);
-            }
+            Random randNum = new Random();
+            var allIteratedNumbers = Enumerable.Range(int.MinValue, int.MaxValue)
+                                     .Select(i => randNum.Next())
+                                     .Distinct()
+                                     .Take(countToAdd)
+                                     .Select(i =>
+                                    {
+                                        bst.Add(i);
+                                        return i;
+                                    }).ToList();
 
             Assert.AreEqual<int>(allIteratedNumbers.Count, bst.Count);
+            CollectionAssert.AreEquivalent(allIteratedNumbers, bst.ToList());
         }
 
         [TestMethod]
         public void PoppedSmallest()
         {
             BinarySearchTree<int> bst = new BinarySearchTree<int>();
-            bst.Add(48);
-            bst.Add(20);
-            bst.Add(18);
-            bst.Add(25);
+            int countToAdd = 50;
+            Random rand = new Random();
 
-            Assert.AreEqual<int>(18, bst.Pop());
-            Assert.AreEqual<int>(3, bst.Count);
+            List<int> allAddedValues = Enumerable.Range(int.MinValue, int.MaxValue)
+                                       .Select(i => rand.Next())
+                                       .Distinct()
+                                       .Take(countToAdd)
+                                       .Select(i =>
+                                      {
+                                          bst.Add(i);
+                                          return i;
+                                      })
+                                       .OrderBy(i => i)
+                                       .ToList();
+
+            Assert.AreEqual<int>(allAddedValues[0], bst.Pop());
+            Assert.AreEqual<int>(allAddedValues.Count - 1, bst.Count);
         }
 
         [TestMethod]
@@ -246,24 +246,23 @@ namespace BinarySearchTreeTests
         public void IterateTest()
         {
             BinarySearchTree<int> bst = new BinarySearchTree<int>();
-            int[] toCheck = new int[] { 18, 20, 21, 23, 25, 31, 48, 50, 90, 110 };
-            bst.Add(48);
-            bst.Add(20);
-            bst.Add(18);
-            bst.Add(25);
-            bst.Add(21);
-            bst.Add(31);
-            bst.Add(23);
-            bst.Add(21);
-            bst.Add(90);
-            bst.Add(50);
-            bst.Add(110);
+            int countToAdd = 50;
+            Random rand = new Random();
+            var allAdded = Enumerable.Range(int.MinValue, int.MaxValue)
+                           .Select(i => rand.Next())
+                           .Distinct()
+                           .Take(countToAdd)
+                           .Select(i =>
+                          {
+                              bst.Add(i);
+                              return i;
+                          })
+                           .OrderBy(i => i)
+                           .ToList();
 
-            int iteration = 0;
-            foreach(var item in bst)
+            for(int i = 0; i < countToAdd; i++)
             {
-                Assert.AreEqual<int>(toCheck[iteration], item);
-                iteration++;
+                Assert.AreEqual<int>(allAdded[i], bst.ElementAt(i));
             }
         }
     }

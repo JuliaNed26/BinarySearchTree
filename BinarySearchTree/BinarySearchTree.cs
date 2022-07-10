@@ -9,23 +9,15 @@ namespace BinarySearchTree
 {
     public class BinarySearchTree<T> : IEnumerable<T> where T : IComparable<T>
     {
-        public int Count { get; private set; }
+        private Node _root;
 
         public BinarySearchTree()
         {
             Count = 0;
         }
-        private class Node
-        {
-            public T value;
-            public Node left;
-            public Node right;
 
-            public Node(T val) => value = val;
-        }
-
-        private Node _root;
-
+        public int Count { get; private set; }
+        
         public T GetRootValue => _root.value;
 
         public void Add(T value)
@@ -41,27 +33,26 @@ namespace BinarySearchTree
 
             void Insert(Node curRoot)
             {
-                bool insertToLeft = curRoot.value.GreaterThan(value) && curRoot.left == null;
-                bool insertToRight = !curRoot.value.GreaterThan(value) && curRoot.right == null;
+                bool insertToLeft = ComparisonOperations.Greater<T>(curRoot.value, value) && curRoot.left == null;
+                bool insertToRight = !ComparisonOperations.Greater<T>(curRoot.value, value) && curRoot.right == null;
 
                 if (curRoot.value.Equals(value))
                 {
                     return;
                 }
-                if(insertToLeft || insertToRight)
+                if (insertToLeft)
                 {
-                    if (insertToLeft)
-                    {
-                        curRoot.left = new Node(value);
-                    }
-                    else
-                    {
-                        curRoot.right = new Node(value);
-                    }
+                    curRoot.left = new Node(value);
                     Count++;
                     return;
                 }
-                if(curRoot.value.GreaterThan(value))
+                if(insertToRight)
+                {
+                    curRoot.right = new Node(value);
+                    Count++;
+                    return;
+                }
+                if(ComparisonOperations.Greater<T>(curRoot.value, value))
                 {
                     Insert(curRoot.left);
                 }
@@ -73,11 +64,15 @@ namespace BinarySearchTree
         }
         public T Pop()
         {
+            if(_root == null)
+            {
+                throw new InvalidOperationException("Could not pop from an empty tree");
+            }
             T valueDeleted;
             if (_root.left == null)
             {
                 valueDeleted = _root.value;
-                _root = _root.right != null ? _root.right : null;
+                _root = _root.right;
             }
             else
             {
@@ -118,12 +113,12 @@ namespace BinarySearchTree
                     DeleteNode(parent, curNode);
                     return;
                 }
-                else if (value.GreaterThan(curNode.value) && curNode.right != null)
+                else if (ComparisonOperations.Greater<T>(value, curNode.value) && curNode.right != null)
                 {
                     DeleteNodeWithValue(value, curNode, curNode.right);
                 }
 
-                else if (!value.GreaterThan(curNode.value) && curNode.left != null)
+                else if (!ComparisonOperations.Greater<T>(value, curNode.value) && curNode.left != null)
                 {
                     DeleteNodeWithValue(value, curNode, curNode.left);
                 }
@@ -193,20 +188,23 @@ namespace BinarySearchTree
 
         public bool Contains(T value)
         {
-            bool found = false;
             Node curNode = _root;
-            while(curNode != null && !found)
+            while(curNode != null)
             {
                 if(curNode.value.Equals(value))
                 {
-                    found = true;
+                    return true;
                 }
-                curNode = curNode.value.GreaterThan<T>(value) ? curNode.left : curNode.right;
+                curNode = ComparisonOperations.Greater<T>(curNode.value, value) ? curNode.left : curNode.right;
             }
-            return found;
+            return false;
         }
 
-        public IEnumerable<T> Iterate()
+        public IEnumerator<T> GetEnumerator() => Iterate().GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        private IEnumerable<T> Iterate()
         {
             IEnumerable<T> IterateRecursively(Node curNode)
             {
@@ -232,11 +230,14 @@ namespace BinarySearchTree
             }
         }
 
-        public IEnumerator<T> GetEnumerator() => Iterate().GetEnumerator();
+        private class Node
+        {
+            public T value;
+            public Node left;
+            public Node right;
 
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-
+            public Node(T val) => value = val;
+        }
 
         //public IEnumerator<T> GetEnumerator() => new BSTEnumerator(this);
         //
@@ -299,9 +300,9 @@ namespace BinarySearchTree
 
     static class ComparisonOperations
     {
-        public static bool GreaterThan<T>(this T item1, T item2) where T : IComparable<T>
-            => item1.CompareTo(item2) > 0;
-        public static bool Equals<T>(this T item1, T item2) where T : IComparable<T>
+        public static bool Greater<T>(T valueToCheck, T item2) where T : IComparable<T>
+            => valueToCheck.CompareTo(item2) > 0;
+        public static bool Equals<T>(T item1, T item2) where T : IComparable<T>
             => item1.CompareTo(item2) == 0;
 
     }
