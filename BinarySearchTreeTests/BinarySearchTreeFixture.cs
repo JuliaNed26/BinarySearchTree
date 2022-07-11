@@ -8,8 +8,8 @@ namespace BinarySearchTree.Tests
     [TestFixture]
     public class BinarySearchTreeFixture
     {
-        private BinarySearchTree<int> testBst = new BinarySearchTree<int>();
-        private List<int> rightResult = new List<int>();
+        private BinarySearchTree<int> testBst;
+        private List<int> rightResult;
 
         public void FillTheTree(int elementsCount)
         {
@@ -30,12 +30,12 @@ namespace BinarySearchTree.Tests
         [SetUp]
         public void RefreshData()
         {
-            testBst.Clear();
-            rightResult.Clear();
+            testBst = new BinarySearchTree<int>();
+            rightResult = new List<int>();
         }
 
         [Test]
-        public void ClearEmptyTree()
+        public void ClearEmptyTree_ShoulNotThrowException()
         {
             testBst.Clear();
 
@@ -43,25 +43,26 @@ namespace BinarySearchTree.Tests
         }
 
         [Test]
-        public void ClearNotEmptyTree()
+        public void ClearNotEmptyTree_CountShoulBeZeroAndRootNull()
         {
             FillTheTree(23);
             testBst.Clear();
 
             Assert.That(testBst.Count, Is.EqualTo(0));
+            Assert.That(testBst.Root, Is.EqualTo(null));
         }
 
         [Test]
-        public void Count_EmptyBST()
+        public void EmptyBST_CountShouldBeZero()
         {
             Assert.That(testBst.Count, Is.EqualTo(0));
         }
 
         [Test]
-        public void AddToEmptyBST()
+        public void AddToEmptyBST_ShouldBeAddedtoRoot()
         {
             FillTheTree(1);
-            Assert.That(testBst.GetRootValue, Is.EqualTo(rightResult[0]));
+            Assert.That(testBst.Root.value, Is.EqualTo(rightResult[0]));
             Assert.That(testBst.Count, Is.EqualTo(1));
         }
 
@@ -70,8 +71,8 @@ namespace BinarySearchTree.Tests
         {
             testBst.Add(100);
             testBst.Add(190);
-            Assert.That(testBst.Count, Is.EqualTo(2));
-            Assert.That(testBst.ElementAt<int>(1), Is.EqualTo(190));
+            Assert.That(testBst.Root.value, Is.EqualTo(100));
+            Assert.That(testBst.Root.right.value, Is.EqualTo(190));
         }
 
         [Test]
@@ -79,12 +80,12 @@ namespace BinarySearchTree.Tests
         {
             testBst.Add(100);
             testBst.Add(19);
-            Assert.That(testBst.Count, Is.EqualTo(2));
-            Assert.That(testBst.ElementAt(0), Is.EqualTo(19));
+            Assert.That(testBst.Root.value, Is.EqualTo(100));
+            Assert.That(testBst.Root.left.value, Is.EqualTo(19));
         }
 
         [Test]
-        public void AddedEqualValues()
+        public void EqualValuesShouldBeAdded()
         {
             testBst.Add(10);
             testBst.Add(10);
@@ -104,6 +105,12 @@ namespace BinarySearchTree.Tests
             CollectionAssert.AreEquivalent(rightResult, testBst.ToList());
         }
 
+        [Test]
+        public void PopFromEmptyTree_ShouldThrowException()
+        {
+            Assert.Throws<InvalidOperationException>(() => testBst.Pop());
+        }
+
         [TestCase(20)]
         [TestCase(40)]
         [TestCase(100)]
@@ -115,19 +122,18 @@ namespace BinarySearchTree.Tests
         }
 
         [Test]
-        public void PopNodeWithRightAncestor()
+        public void PopNodeWithRightAncestor_RightAncestorShouldBeInThePlaceOfPopped()
         {
             testBst.Add(48);
             testBst.Add(20);
             testBst.Add(25);
-            testBst.Pop();
 
-            Assert.That(testBst.Pop(), Is.EqualTo(25));
-            Assert.That(testBst.Count, Is.EqualTo(1));
+            Assert.That(testBst.Pop(), Is.EqualTo(20));
+            Assert.That(testBst.Root.left.value, Is.EqualTo(25));
         }
 
         [Test]
-        public void PopNodeWithoutAncestors()
+        public void PopNodeWithoutAncestors_AfterPoppedWithoutAncestorsParentShouldBePopped()
         {
             testBst.Add(48);
             testBst.Add(20);
@@ -140,27 +146,39 @@ namespace BinarySearchTree.Tests
         }
 
         [Test]
-        public void PopRootWithRightAncestor()
+        public void PopRootWithRightAncestor_RightAncestorShouldBeRoot()
         {
             testBst.Add(48);
             testBst.Add(90);
 
             Assert.That(testBst.Pop(), Is.EqualTo(48));
-            Assert.That(testBst.GetRootValue, Is.EqualTo(90));
+            Assert.That(testBst.Root.value, Is.EqualTo(90));
             Assert.That(testBst.Count, Is.EqualTo(1));
         }
 
         [Test]
-        public void PopRootWithoutAncestors()
+        public void PopRootWithoutAncestors_RootShouldBeNull()
         {
             FillTheTree(1);
 
             Assert.That(testBst.Pop(), Is.EqualTo(rightResult[0]));
-            Assert.That(testBst.Count, Is.EqualTo(0));
+            Assert.That(testBst.Root, Is.EqualTo(null));
+        }
+
+        [TestCase(20)]
+        [TestCase(40)]
+        [TestCase(100)]
+        public void DeleteNotExistsValue_ShouldDeleteNothing(int countToAdd)
+        {
+            FillTheTree(countToAdd);
+            int poppedValue = testBst.Pop();
+            int countBeforeDeleting = testBst.Count;
+            testBst.Delete(poppedValue);
+            Assert.That(testBst.Count, Is.EqualTo(countBeforeDeleting));
         }
 
         [Test]
-        public void DeleteValueLeaf()
+        public void DeleteValueLeaf_ShouldBeDeletedWithNoRelocations()
         {
             testBst.Add(48);
             testBst.Add(20);
@@ -169,11 +187,13 @@ namespace BinarySearchTree.Tests
             testBst.Add(21);
             testBst.Delete(18);
 
-            Assert.IsFalse(testBst.Contains(18));
+            Assert.That(testBst.Root.left.left, Is.EqualTo(null));
+            Assert.That(testBst.Root.left.value, Is.EqualTo(20));
+            Assert.That(testBst.Count, Is.EqualTo(4));
         }
 
         [Test]
-        public void DeleteValueNodeWithOneAncestor()
+        public void DeleteValueNodeWithOneAncestor_AncestorShouldBeOnPlaceOfDeleted()
         {
             testBst.Add(48);
             testBst.Add(20);
@@ -181,17 +201,17 @@ namespace BinarySearchTree.Tests
             testBst.Add(21);
             testBst.Delete(20);
 
-            Assert.IsFalse(testBst.Contains(20));
-            Assert.IsTrue(testBst.Contains(25));
+            Assert.That(testBst.Root.left.value, Is.EqualTo(25));
+            Assert.That(testBst.Count, Is.EqualTo(3));
 
             testBst.Delete(25);
 
-            Assert.IsFalse(testBst.Contains(25));
-            Assert.IsTrue(testBst.Contains(21));
+            Assert.That(testBst.Root.left.value, Is.EqualTo(21));
+            Assert.That(testBst.Count, Is.EqualTo(2));
         }
 
         [Test]
-        public void DeleteValueNodeWithTwoAncestors()
+        public void DeleteValueNodeWithTwoAncestors_SmallestLeafValueOfRightAncestorSouldBeOnValueOfDeleted()
         {
             testBst.Add(48);
             testBst.Add(20);
@@ -200,14 +220,12 @@ namespace BinarySearchTree.Tests
             testBst.Add(21);
             testBst.Delete(20);
 
-            Assert.IsFalse(testBst.Contains(20));
-            Assert.IsTrue(testBst.Contains(25));
-            Assert.IsTrue(testBst.Contains(18));
-            Assert.IsTrue(testBst.Contains(21));
+            Assert.That(testBst.Root.left.value, Is.EqualTo(21));
+            Assert.That(testBst.Root.left.right.left, Is.EqualTo(null));
         }
 
         [Test]
-        public void DeleteRootWithTwoAncestors()
+        public void DeleteRootWithTwoAncestors_SmallestLeafValueOfRightAncestorShoulBeOnValueOfDeleted()
         {
             testBst.Add(48);
             testBst.Add(20);
@@ -217,11 +235,11 @@ namespace BinarySearchTree.Tests
             testBst.Delete(48);
 
             Assert.IsFalse(testBst.Contains(48));
-            Assert.That(testBst.GetRootValue, Is.EqualTo(50));
+            Assert.That(testBst.Root.value, Is.EqualTo(50));
         }
 
         [Test]
-        public void DeleteRootWithOneAncestor()
+        public void DeleteRootWithOneAncestor_AncestorShouldBeARoot()
         {
             testBst.Add(48);
             testBst.Add(90);
@@ -230,22 +248,22 @@ namespace BinarySearchTree.Tests
             testBst.Delete(48);
 
             Assert.IsFalse(testBst.Contains(48));
-            Assert.That(testBst.GetRootValue, Is.EqualTo(90));
+            Assert.That(testBst.Root.value, Is.EqualTo(90));
         }
 
         [Test]
-        public void DeleteRootWithoutAncestors()
+        public void DeleteRootWithoutAncestors_RootShoulBeNull()
         {
             FillTheTree(1);
             testBst.Delete(rightResult[0]);
 
-            Assert.That(testBst.Count, Is.EqualTo(0));
+            Assert.That(testBst.Root, Is.EqualTo(null));
         }
 
         [TestCase(20)]
         [TestCase(40)]
         [TestCase(100)]
-        public void IterateTest(int countToAdd)
+        public void IterateTest_AllShouldBeIterated(int countToAdd)
         {
             FillTheTree(countToAdd);
 
