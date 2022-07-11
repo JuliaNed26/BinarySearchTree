@@ -186,6 +186,14 @@ namespace BinarySearchTree
             }
         }
 
+        public void Clear()
+        {
+            while(_root != null)
+            {
+                Pop();
+            }
+        }
+
         public bool Contains(T value)
         {
             Node curNode = _root;
