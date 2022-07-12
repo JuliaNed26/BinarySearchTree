@@ -62,7 +62,7 @@ namespace BinarySearchTree.Tests
         public void AddToEmptyBST_ShouldBeAddedtoRoot()
         {
             FillTheTree(1);
-            Assert.That(testBst.Root.value, Is.EqualTo(rightResult[0]));
+            Assert.That(testBst.Root.Value, Is.EqualTo(rightResult[0]));
             Assert.That(testBst.Count, Is.EqualTo(1));
         }
 
@@ -71,8 +71,8 @@ namespace BinarySearchTree.Tests
         {
             testBst.Add(100);
             testBst.Add(190);
-            Assert.That(testBst.Root.value, Is.EqualTo(100));
-            Assert.That(testBst.Root.right.value, Is.EqualTo(190));
+            Assert.That(testBst.Root.Value, Is.EqualTo(100));
+            Assert.That(testBst.Root.Right.Value, Is.EqualTo(190));
         }
 
         [Test]
@@ -80,8 +80,8 @@ namespace BinarySearchTree.Tests
         {
             testBst.Add(100);
             testBst.Add(19);
-            Assert.That(testBst.Root.value, Is.EqualTo(100));
-            Assert.That(testBst.Root.left.value, Is.EqualTo(19));
+            Assert.That(testBst.Root.Value, Is.EqualTo(100));
+            Assert.That(testBst.Root.Left.Value, Is.EqualTo(19));
         }
 
         [Test]
@@ -129,7 +129,7 @@ namespace BinarySearchTree.Tests
             testBst.Add(25);
 
             Assert.That(testBst.Pop(), Is.EqualTo(20));
-            Assert.That(testBst.Root.left.value, Is.EqualTo(25));
+            Assert.That(testBst.Root.Left.Value, Is.EqualTo(25));
         }
 
         [Test]
@@ -152,7 +152,7 @@ namespace BinarySearchTree.Tests
             testBst.Add(90);
 
             Assert.That(testBst.Pop(), Is.EqualTo(48));
-            Assert.That(testBst.Root.value, Is.EqualTo(90));
+            Assert.That(testBst.Root.Value, Is.EqualTo(90));
             Assert.That(testBst.Count, Is.EqualTo(1));
         }
 
@@ -187,8 +187,8 @@ namespace BinarySearchTree.Tests
             testBst.Add(21);
             testBst.Delete(18);
 
-            Assert.That(testBst.Root.left.left, Is.EqualTo(null));
-            Assert.That(testBst.Root.left.value, Is.EqualTo(20));
+            Assert.That(testBst.Root.Left.Left, Is.EqualTo(null));
+            Assert.That(testBst.Root.Left.Value, Is.EqualTo(20));
             Assert.That(testBst.Count, Is.EqualTo(4));
         }
 
@@ -201,12 +201,12 @@ namespace BinarySearchTree.Tests
             testBst.Add(21);
             testBst.Delete(20);
 
-            Assert.That(testBst.Root.left.value, Is.EqualTo(25));
+            Assert.That(testBst.Root.Left.Value, Is.EqualTo(25));
             Assert.That(testBst.Count, Is.EqualTo(3));
 
             testBst.Delete(25);
 
-            Assert.That(testBst.Root.left.value, Is.EqualTo(21));
+            Assert.That(testBst.Root.Left.Value, Is.EqualTo(21));
             Assert.That(testBst.Count, Is.EqualTo(2));
         }
 
@@ -220,8 +220,8 @@ namespace BinarySearchTree.Tests
             testBst.Add(21);
             testBst.Delete(20);
 
-            Assert.That(testBst.Root.left.value, Is.EqualTo(21));
-            Assert.That(testBst.Root.left.right.left, Is.EqualTo(null));
+            Assert.That(testBst.Root.Left.Value, Is.EqualTo(21));
+            Assert.That(testBst.Root.Left.Right.Left, Is.EqualTo(null));
         }
 
         [Test]
@@ -235,7 +235,7 @@ namespace BinarySearchTree.Tests
             testBst.Delete(48);
 
             Assert.IsFalse(testBst.Contains(48));
-            Assert.That(testBst.Root.value, Is.EqualTo(50));
+            Assert.That(testBst.Root.Value, Is.EqualTo(50));
         }
 
         [Test]
@@ -248,7 +248,7 @@ namespace BinarySearchTree.Tests
             testBst.Delete(48);
 
             Assert.IsFalse(testBst.Contains(48));
-            Assert.That(testBst.Root.value, Is.EqualTo(90));
+            Assert.That(testBst.Root.Value, Is.EqualTo(90));
         }
 
         [Test]

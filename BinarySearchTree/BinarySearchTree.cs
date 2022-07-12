@@ -9,30 +9,31 @@ namespace BinarySearchTree
 {
     public class BinarySearchTree<T> : IEnumerable<T> where T : IComparable<T>
     {
+        private Node _root;
         public BinarySearchTree()
         {
             Count = 0;
         }
-        public Node Root { get; private set; }
+        public INode<T> Root => _root;
         public int Count { get; private set; }
 
         public void Add(T value)
         {
             if (Root == null)//if we don't have root
             {
-                Root = new Node(value);
+                _root = new Node(value);
                 Count++;
                 return;
             }
 
-            Add(Root);
+            Add(_root);
 
             void Add(Node curRoot)
             {
-                bool insertToLeft = curRoot.value.GreaterThan<T>(value) && curRoot.left == null;
-                bool insertToRight = curRoot.value.LessThan<T>(value) && curRoot.right == null;
+                bool insertToLeft = curRoot.Value.GreaterThan<T>(value) && curRoot.Left == null;
+                bool insertToRight = curRoot.Value.LessThan<T>(value) && curRoot.Right == null;
 
-                if (curRoot.value.Equals(value))
+                if (curRoot.Value.Equals(value))
                 {
                     return;
                 }
@@ -48,7 +49,7 @@ namespace BinarySearchTree
                     Count++;
                     return;
                 }
-                if(curRoot.value.GreaterThan<T>(value))
+                if(curRoot.Value.GreaterThan<T>(value))
                 {
                     Add(curRoot.left);
                 }
@@ -65,24 +66,24 @@ namespace BinarySearchTree
                 throw new InvalidOperationException("Could not pop from an empty tree");
             }
             T valueDeleted;
-            if (Root.left == null)
+            if (Root.Left == null)
             {
-                valueDeleted = Root.value;
-                Root = Root.right;
+                valueDeleted = Root.Value;
+                _root = _root.right;
             }
             else
             {
-                valueDeleted = Pop(Root, Root.left);
+                valueDeleted = Pop(_root, _root.left);
             }
             Count--;
             return valueDeleted;
 
             T Pop(Node parent, Node current)
             {
-                if (current.left == null)
+                if (current.Left == null)
                 {
                     parent.left = current.right;
-                    return current.value;
+                    return current.Value;
                 }
                 else
                 {
@@ -94,7 +95,7 @@ namespace BinarySearchTree
         {
             try
             {
-                DeleteNodeWithValue(value, null, Root);
+                DeleteNodeWithValue(value, null, _root);
                 Count--;
             }
             catch (InvalidDataException ex)
@@ -104,17 +105,17 @@ namespace BinarySearchTree
 
             void DeleteNodeWithValue(T value, Node parent, Node curNode)
             {
-                if (value.Equals(curNode.value))
+                if (value.Equals(curNode.Value))
                 {
                     DeleteNode(parent, curNode);
                     return;
                 }
-                else if (value.GreaterThan<T>(curNode.value) && curNode.right != null)
+                else if (value.GreaterThan<T>(curNode.Value) && curNode.Right != null)
                 {
                     DeleteNodeWithValue(value, curNode, curNode.right);
                 }
 
-                else if (value.LessThan<T>(curNode.value) && curNode.left != null)
+                else if (value.LessThan<T>(curNode.Value) && curNode.Left != null)
                 {
                     DeleteNodeWithValue(value, curNode, curNode.left);
                 }
@@ -126,49 +127,51 @@ namespace BinarySearchTree
 
             void DeleteNode(Node parent, Node nodeToDel)
             {
-                if (nodeToDel.right != null && nodeToDel.left != null)
+                if (nodeToDel.Right != null && nodeToDel.Left != null)
                 {
                     nodeToDel.value = FindAndPopSmallestLeaf(nodeToDel, nodeToDel.right);
                 }
-                else if (nodeToDel.left == null && nodeToDel.right == null)
+                else if (nodeToDel.Left == null && nodeToDel.Right == null)
                 {
                     FindAndPopSmallestLeaf(parent, nodeToDel);
                 }
                 else
                 {
-                    if(parent == null)//root
+                    var notNullAncestor = nodeToDel.left != null ? nodeToDel.left : nodeToDel.right;
+
+                    if (parent == null)//root
                     {
-                        Root = nodeToDel.left != null ? nodeToDel.left : nodeToDel.right;
+                        _root = notNullAncestor;
                     }
-                    else if (parent.left != null && parent.left.value.Equals(nodeToDel.value))
+                    else if (parent.Left != null && parent.Left.Value.Equals(nodeToDel.Value))
                     {
-                        parent.left = nodeToDel.left != null ? nodeToDel.left : nodeToDel.right;
+                        parent.left = notNullAncestor;
                     }
                     else
                     {
-                        parent.right = nodeToDel.left != null ? nodeToDel.left : nodeToDel.right;
+                        parent.right = notNullAncestor;
                     }
                 }
             }
 
             T FindAndPopSmallestLeaf(Node parent, Node curNode)
             {
-                if (curNode.left != null)
+                if (curNode.Left != null)
                 {
                     return FindAndPopSmallestLeaf(curNode, curNode.left);
                 }
-                else if (curNode.right != null)
+                else if (curNode.Right != null)
                 {
                     return FindAndPopSmallestLeaf(curNode, curNode.right);
                 }
                 else
                 {
-                    var leafVal = curNode.value;
+                    var leafVal = curNode.Value;
                     if (parent == null)//root
                     {
-                        Root = null;
+                        _root = null;
                     }
-                    else if (parent.left != null && parent.left.value.Equals(curNode.value))
+                    else if (parent.Left != null && parent.Left.Value.Equals(curNode.Value))
                     {
                         parent.left = null;
                     }
@@ -184,18 +187,16 @@ namespace BinarySearchTree
 
         public void Clear()
         {
-            while(Root != null)
-            {
-                Pop();
-            }
+            _root = null;
+            Count = 0;
         }
 
         public bool Contains(T value)
         {
-            Node curNode = Root;
+            Node curNode = _root;
             while(curNode != null)
             {
-                if(curNode.value.Equals(value))
+                if(curNode.Value.Equals(value))
                 {
                     return true;
                 }
@@ -212,15 +213,15 @@ namespace BinarySearchTree
         {
             IEnumerable<T> IterateRecursively(Node curNode)
             {
-                if (curNode.left != null)
+                if (curNode.Left != null)
                 {
                     foreach (var item in IterateRecursively(curNode.left))
                     {
                         yield return item;
                     }
                 }
-                yield return curNode.value;
-                if (curNode.right != null)
+                yield return curNode.Value;
+                if (curNode.Right != null)
                 {
                     foreach (var item in IterateRecursively(curNode.right))
                     {
@@ -228,19 +229,23 @@ namespace BinarySearchTree
                     }
                 }
             }
-            foreach (var item in IterateRecursively(Root))
+            foreach (var item in IterateRecursively(_root))
             {
                 yield return item;
             }
         }
 
-        public class Node
+        private class Node : INode<T>
         {
             public T value;
-            public Node left;
-            public Node right;
-
+            public Node left, right;
             public Node(T val) => value = val;
+
+            public T Value => value;
+
+            public INode<T> Left => left;
+
+            public INode<T> Right => right;
         }
 
         //public IEnumerator<T> GetEnumerator() => new BSTEnumerator(this);
