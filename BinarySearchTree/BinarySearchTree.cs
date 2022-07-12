@@ -39,23 +39,23 @@ namespace BinarySearchTree
                 }
                 if (insertToLeft)
                 {
-                    curRoot.left = new Node(value);
+                    curRoot.NodeLeft = new Node(value);
                     Count++;
                     return;
                 }
                 if(insertToRight)
                 {
-                    curRoot.right = new Node(value);
+                    curRoot.NodeRight = new Node(value);
                     Count++;
                     return;
                 }
                 if(curRoot.Value.GreaterThan<T>(value))
                 {
-                    Add(curRoot.left);
+                    Add(curRoot.NodeLeft);
                 }
                 else
                 {
-                    Add(curRoot.right);
+                    Add(curRoot.NodeRight);
                 }
             }
         }
@@ -69,11 +69,11 @@ namespace BinarySearchTree
             if (Root.Left == null)
             {
                 valueDeleted = Root.Value;
-                _root = _root.right;
+                _root = _root.NodeRight;
             }
             else
             {
-                valueDeleted = Pop(_root, _root.left);
+                valueDeleted = Pop(_root, _root.NodeLeft);
             }
             Count--;
             return valueDeleted;
@@ -82,12 +82,12 @@ namespace BinarySearchTree
             {
                 if (current.Left == null)
                 {
-                    parent.left = current.right;
+                    parent.NodeLeft = current.NodeRight;
                     return current.Value;
                 }
                 else
                 {
-                    return Pop(current, current.left);
+                    return Pop(current, current.NodeLeft);
                 }
             }
         }
@@ -112,12 +112,12 @@ namespace BinarySearchTree
                 }
                 else if (value.GreaterThan<T>(curNode.Value) && curNode.Right != null)
                 {
-                    DeleteNodeWithValue(value, curNode, curNode.right);
+                    DeleteNodeWithValue(value, curNode, curNode.NodeRight);
                 }
 
                 else if (value.LessThan<T>(curNode.Value) && curNode.Left != null)
                 {
-                    DeleteNodeWithValue(value, curNode, curNode.left);
+                    DeleteNodeWithValue(value, curNode, curNode.NodeLeft);
                 }
                 else
                 {
@@ -129,7 +129,7 @@ namespace BinarySearchTree
             {
                 if (nodeToDel.Right != null && nodeToDel.Left != null)
                 {
-                    nodeToDel.value = FindAndPopSmallestLeaf(nodeToDel, nodeToDel.right);
+                    nodeToDel.NodeValue = FindAndPopSmallestLeaf(nodeToDel, nodeToDel.NodeRight);
                 }
                 else if (nodeToDel.Left == null && nodeToDel.Right == null)
                 {
@@ -137,7 +137,7 @@ namespace BinarySearchTree
                 }
                 else
                 {
-                    var notNullAncestor = nodeToDel.left != null ? nodeToDel.left : nodeToDel.right;
+                    var notNullAncestor = nodeToDel.NodeLeft != null ? nodeToDel.NodeLeft : nodeToDel.NodeRight;
 
                     if (parent == null)//root
                     {
@@ -145,11 +145,11 @@ namespace BinarySearchTree
                     }
                     else if (parent.Left != null && parent.Left.Value.Equals(nodeToDel.Value))
                     {
-                        parent.left = notNullAncestor;
+                        parent.NodeLeft = notNullAncestor;
                     }
                     else
                     {
-                        parent.right = notNullAncestor;
+                        parent.NodeRight = notNullAncestor;
                     }
                 }
             }
@@ -158,11 +158,11 @@ namespace BinarySearchTree
             {
                 if (curNode.Left != null)
                 {
-                    return FindAndPopSmallestLeaf(curNode, curNode.left);
+                    return FindAndPopSmallestLeaf(curNode, curNode.NodeLeft);
                 }
                 else if (curNode.Right != null)
                 {
-                    return FindAndPopSmallestLeaf(curNode, curNode.right);
+                    return FindAndPopSmallestLeaf(curNode, curNode.NodeRight);
                 }
                 else
                 {
@@ -173,11 +173,11 @@ namespace BinarySearchTree
                     }
                     else if (parent.Left != null && parent.Left.Value.Equals(curNode.Value))
                     {
-                        parent.left = null;
+                        parent.NodeLeft = null;
                     }
                     else
                     {
-                        parent.right = null;
+                        parent.NodeRight = null;
                     }
 
                     return leafVal;
@@ -200,7 +200,7 @@ namespace BinarySearchTree
                 {
                     return true;
                 }
-                curNode = curNode.value.GreaterThan<T>(value) ? curNode.left : curNode.right;
+                curNode = curNode.NodeValue.GreaterThan<T>(value) ? curNode.NodeLeft : curNode.NodeRight;
             }
             return false;
         }
@@ -215,7 +215,7 @@ namespace BinarySearchTree
             {
                 if (curNode.Left != null)
                 {
-                    foreach (var item in IterateRecursively(curNode.left))
+                    foreach (var item in IterateRecursively(curNode.NodeLeft))
                     {
                         yield return item;
                     }
@@ -223,7 +223,7 @@ namespace BinarySearchTree
                 yield return curNode.Value;
                 if (curNode.Right != null)
                 {
-                    foreach (var item in IterateRecursively(curNode.right))
+                    foreach (var item in IterateRecursively(curNode.NodeRight))
                     {
                         yield return item;
                     }
@@ -237,15 +237,16 @@ namespace BinarySearchTree
 
         private class Node : INode<T>
         {
-            public T value;
-            public Node left, right;
-            public Node(T val) => value = val;
+            public Node(T val) => NodeValue = val;
+            public T NodeValue { get; set; }
+            public Node NodeLeft { get; set; }
+            public Node NodeRight { get; set; }
 
-            public T Value => value;
+            public T Value => NodeValue;
 
-            public INode<T> Left => left;
+            public INode<T> Left => NodeLeft;
 
-            public INode<T> Right => right;
+            public INode<T> Right => NodeRight;
         }
 
         //public IEnumerator<T> GetEnumerator() => new BSTEnumerator(this);
