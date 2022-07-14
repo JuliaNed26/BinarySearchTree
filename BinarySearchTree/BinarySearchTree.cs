@@ -17,6 +17,26 @@ namespace BinarySearchTree
         public INode<T> Root => _root;
         public int Count { get; private set; }
 
+        public static explicit operator HashSet<T>(BinarySearchTree<T> bst)
+        {
+            HashSet<T> hashSet = new HashSet<T>();
+            foreach(var item in bst)
+            {
+                hashSet.Add(item);
+            }
+            return hashSet;
+        }
+
+        public override string ToString()
+        {
+            StringBuilder strBuilder = new StringBuilder();
+            foreach (var item in this)
+            {
+                strBuilder.Append(item.ToString() + " ");
+            }
+            return strBuilder.ToString();
+        }
+
         public void Add(T value)
         {
             if (Root == null)//if we don't have root

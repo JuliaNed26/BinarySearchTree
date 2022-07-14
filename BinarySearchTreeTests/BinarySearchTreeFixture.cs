@@ -2,6 +2,7 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace BinarySearchTree.Tests
 {
@@ -32,6 +33,28 @@ namespace BinarySearchTree.Tests
         {
             testBst = new BinarySearchTree<int>();
             rightResult = new List<int>();
+        }
+
+        [TestCase(50)]
+        public void ConvertTreeToHashSet(int countToAdd)
+        {
+            FillTheTree(countToAdd);
+            HashSet<int> testHashSet = (HashSet<int>)testBst;
+
+            CollectionAssert.AreEquivalent(testHashSet, testBst);
+        }
+
+        [TestCase(50)]
+        public void TreeToString(int countToAdd)
+        {
+            FillTheTree(countToAdd);
+            StringBuilder strBuilder = new StringBuilder();
+            foreach(var item in testBst)
+            {
+                strBuilder.Append(item + " ");
+            }
+
+            Assert.That(testBst.ToString(), Is.EqualTo(strBuilder.ToString()));
         }
 
         [Test]
