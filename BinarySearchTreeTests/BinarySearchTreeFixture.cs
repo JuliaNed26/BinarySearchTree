@@ -34,6 +34,14 @@ namespace BinarySearchTree.Tests
             testBst = new BinarySearchTree<int>();
             rightResult = new List<int>();
         }
+        [TestCase(50)]
+        public void ConvertTreeToList(int countToAdd)
+        {
+            FillTheTree(countToAdd);
+            List<int> testHashSet = testBst;
+
+            CollectionAssert.AreEquivalent(testHashSet, testBst);
+        }
 
         [TestCase(50)]
         public void ConvertTreeToHashSet(int countToAdd)
@@ -44,17 +52,15 @@ namespace BinarySearchTree.Tests
             CollectionAssert.AreEquivalent(testHashSet, testBst);
         }
 
-        [TestCase(50)]
         public void TreeToString(int countToAdd)
         {
-            FillTheTree(countToAdd);
-            StringBuilder strBuilder = new StringBuilder();
-            foreach(var item in testBst)
-            {
-                strBuilder.Append(item + " ");
-            }
+            testBst.Add(48);
+            testBst.Add(20);
+            testBst.Add(90);
+            testBst.Add(50);
+            testBst.Add(110);
 
-            Assert.That(testBst.ToString(), Is.EqualTo(strBuilder.ToString()));
+            Assert.That(testBst.ToString(), Is.EqualTo("20 48 50 90 110"));
         }
 
         [Test]

@@ -17,24 +17,22 @@ namespace BinarySearchTree
         public INode<T> Root => _root;
         public int Count { get; private set; }
 
+        public static implicit operator List<T>(BinarySearchTree<T> bst)
+        {
+            List<T> list = (from T item in bst select item).ToList();
+            return list;
+        }
+
         public static explicit operator HashSet<T>(BinarySearchTree<T> bst)
         {
-            HashSet<T> hashSet = new HashSet<T>();
-            foreach(var item in bst)
-            {
-                hashSet.Add(item);
-            }
+            HashSet<T> hashSet = (from T item in bst select item).ToHashSet<T>();
             return hashSet;
         }
 
         public override string ToString()
         {
-            StringBuilder strBuilder = new StringBuilder();
-            foreach (var item in this)
-            {
-                strBuilder.Append(item.ToString() + " ");
-            }
-            return strBuilder.ToString();
+            string result = string.Join(" ", from T item in this select item.ToString());
+            return result;
         }
 
         public void Add(T value)
