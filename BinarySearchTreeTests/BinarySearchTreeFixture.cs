@@ -34,6 +34,23 @@ namespace BinarySearchTree.Tests
             testBst = new BinarySearchTree<int>();
             rightResult = new List<int>();
         }
+         
+        [TestCase(50)]
+        public void TestDeepCopy(int countToAdd)
+        {
+            FillTheTree(countToAdd);
+            BinarySearchTree<int> copiedBst = (BinarySearchTree<int>) testBst.Clone();
+
+            CollectionAssert.AreEqual(copiedBst, testBst);
+
+            int valToDelete = testBst.ElementAt(10);
+            copiedBst.Delete(valToDelete);
+
+            CollectionAssert.AreNotEqual(testBst, copiedBst);
+            Assert.IsTrue(testBst.Contains(valToDelete));
+            Assert.IsFalse(copiedBst.Contains(valToDelete));
+        }
+
         [TestCase(50)]
         public void ConvertTreeToList(int countToAdd)
         {
@@ -52,7 +69,8 @@ namespace BinarySearchTree.Tests
             CollectionAssert.AreEquivalent(testHashSet, testBst);
         }
 
-        public void TreeToString(int countToAdd)
+        [Test]
+        public void TreeToString()
         {
             testBst.Add(48);
             testBst.Add(20);

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BinarySearchTree
 {
-    public class BinarySearchTree<T> : IEnumerable<T> where T : IComparable<T>
+    public class BinarySearchTree<T> : ICloneable, IEnumerable<T> where T : IComparable<T>
     {
         private Node _root;
         public BinarySearchTree()
@@ -17,23 +17,11 @@ namespace BinarySearchTree
         public INode<T> Root => _root;
         public int Count { get; private set; }
 
-        public static implicit operator List<T>(BinarySearchTree<T> bst)
-        {
-            List<T> list = (from T item in bst select item).ToList();
-            return list;
-        }
+        public static implicit operator List<T>(BinarySearchTree<T> bst) => bst.Select(item => item).ToList();
 
-        public static explicit operator HashSet<T>(BinarySearchTree<T> bst)
-        {
-            HashSet<T> hashSet = (from T item in bst select item).ToHashSet<T>();
-            return hashSet;
-        }
+        public static explicit operator HashSet<T>(BinarySearchTree<T> bst) => bst.Select(item => item).ToHashSet<T>();
 
-        public override string ToString()
-        {
-            string result = string.Join(" ", from T item in this select item.ToString());
-            return result;
-        }
+        public override string ToString() => string.Join(" ", this.Select( item => item.ToString()));
 
         public void Add(T value)
         {
@@ -253,70 +241,44 @@ namespace BinarySearchTree
             }
         }
 
+        public object Clone()
+        {
+            BinarySearchTree<T> bst = new BinarySearchTree<T>();
+
+            RecursiveInsertion(_root);
+
+            void RecursiveInsertion(INode<T> node)
+            {
+                //but we can not check whether T is a reference type, because user can not change the value of a node
+                //did it just because this will satisfy deep copy rule
+                var valueToCopy = typeof(T).IsValueType ? node.Value : (T)Activator.CreateInstance(typeof(T), node.Value);
+
+                bst.Add(valueToCopy);
+                if (node.Right != null)
+                {
+                    RecursiveInsertion(node.Right);
+                }
+                if (node.Left != null)
+                {
+                    RecursiveInsertion(node.Left);
+                }
+            }
+            return bst;
+        }
+
         private class Node : INode<T>
         {
             public Node(T val) => Value = val;
+            public Node(T val, Node left, Node right)
+            {
+                Value = val;
+                Left = left;
+                Right = right;
+            }
             public T Value { get; set; }
             public INode<T> Left { get; set; }
             public INode<T> Right { get; set; }
         }
-
-        //public IEnumerator<T> GetEnumerator() => new BSTEnumerator(this);
-        //
-        //IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        //private class BSTEnumerator : IEnumerator<T>
-        //{
-        //    private BinarySearchTree<T> _bst;
-        //    private Stack<Node> _readNodes;
-        //    private Node _current;
-        //    private bool _toRight = false;
-        //    public BSTEnumerator(BinarySearchTree<T> _bst_)
-        //    {
-        //        _bst = _bst_;
-        //        _readNodes = new Stack<Node>();
-        //        _current = _bst._root;
-        //    }
-        //
-        //    public T Current => _current.value;
-        //
-        //    object IEnumerator.Current => Current;
-        //
-        //    public void Dispose()
-        //    {
-        //    }
-        //
-        //    public bool MoveNext()
-        //    {
-        //        if (_toRight)
-        //        {
-        //            _current = _current.right;
-        //        }
-        //        while (true)
-        //        {
-        //            if (_current != null)
-        //            {
-        //                _readNodes.Push(_current);
-        //                _current = _current.left;
-        //            }
-        //            else if (_readNodes.Count != 0)
-        //            {
-        //                _current = _readNodes.Pop();
-        //                _toRight = true;
-        //                return true;
-        //            }
-        //            else
-        //            {
-        //                return false;
-        //            }
-        //        }
-        //    }
-        //
-        //    public void Reset()
-        //    {
-        //        throw new NotImplementedException();
-        //    }
-        //}
 
     }
 
