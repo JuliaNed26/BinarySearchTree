@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,18 +11,20 @@ namespace BinarySearchTree
     public class BinarySearchTree<T> : ICloneable, IEnumerable<T> where T : IComparable<T>
     {
         private Node _root;
+
         public BinarySearchTree()
         {
             Count = 0;
         }
         public INode<T> Root => _root;
+
         public int Count { get; private set; }
 
         public static implicit operator List<T>(BinarySearchTree<T> bst) => bst.Select(item => item).ToList();
 
         public static explicit operator HashSet<T>(BinarySearchTree<T> bst) => bst.Select(item => item).ToHashSet<T>();
 
-        public override string ToString() => string.Join(" ", this.Select( item => item.ToString()));
+        public override string ToString() => string.Join(" ", this);
 
         public void Add(T value)
         {
@@ -65,11 +68,14 @@ namespace BinarySearchTree
                 }
             }
         }
-        public T Pop()
+
+        public T Pop([CallerMemberName] string caller = null,
+                     [CallerFilePath] string callerPath = null,
+                     [CallerLineNumber] int line = 0)
         {
             if(Root == null)
             {
-                throw new InvalidOperationException("Could not pop from an empty tree");
+                throw new InvalidOperationException($"Could not pop from an empty tree\n Caller : {caller}\n Path : {callerPath}\n Line : {line}");
             }
             T valueDeleted;
             if (Root.Left == null)
@@ -97,6 +103,7 @@ namespace BinarySearchTree
                 }
             }
         }
+
         public void Delete(T value)
         {
             try

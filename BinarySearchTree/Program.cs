@@ -1,4 +1,16 @@
 ﻿using BinarySearchTree;
 
-BinarySearchTree<int> bst = new BinarySearchTree<int>();
+
+
+
+BinarySearchTree<int> tree = new BinarySearchTree<int>();
+try
+{
+    tree.Pop();
+}
+catch (InvalidOperationException ex)
+{
+    Console.WriteLine(ex.Message);
+}
+
 
